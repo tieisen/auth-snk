@@ -12,11 +12,11 @@ class Criptografia:
         Inicializa a classe com uma chave Fernet.
         """
         self.path = os.getenv('PATH_FERNET_KEY')
-        chave = self.ler_key()
+        chave = self.lerChave()
         if not chave:
             chave = Fernet.generate_key()
             self.chave = chave
-            self.salvar_key()
+            self.salvarChave()
         self.chave = chave
         self.fernet = Fernet(self.chave)
 

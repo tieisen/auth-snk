@@ -1,9 +1,12 @@
-__pycache__
-.local
-venv
+__pycache__/
+alembic/
+.local/
+venv/
 .env
+.fernet.key
 *.log
 *.json
 *.egg-info
 *.sqlite
 *.ipynb
+alembic.ini

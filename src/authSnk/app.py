@@ -2,7 +2,8 @@ import tomllib
 from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.authSnk.controllers.api import router
+from src.authSnk.controllers.solucao import router as routerSolucao
+from src.authSnk.controllers.autenticacao import router as routerAutenticacao
 from src.authSnk.utils.configLog import configLog
 from authSnk.utils.paths import PROJECT_ROOT
 from dotenv import load_dotenv
@@ -33,7 +34,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router, tags=["API"])
+app.include_router(routerSolucao, tags=["Soluções"])
+app.include_router(routerAutenticacao, tags=["Autenticação"])
 
 @app.get("/",include_in_schema=False)
 def read_root():

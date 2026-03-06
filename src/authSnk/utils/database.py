@@ -33,7 +33,7 @@ def validarCriptografia(colunas_criptografadas:list[str], kwargs:dict) -> dict:
     cripto = Criptografia()
     try:
         for key, value in kwargs.items():
-            if key in colunas_criptografadas:
+            if key in colunas_criptografadas and value:
                 kwargs[key] = cripto.criptografar(value).decode()
     except Exception as e:
         erro = f"Erro ao criptografar dados da coluna {key}. {e}"
@@ -49,8 +49,8 @@ def removerCriptografia(colunas_criptografadas:list[str], dados:dict) -> dict:
     """        
     cripto = Criptografia()
     try:
-        for key, value in dados.items():
-            if key in colunas_criptografadas:
+        for key, value in dados.items():   
+            if key in colunas_criptografadas and value:
                 dados[key] = cripto.descriptografar(value)
     except Exception as e:
         erro = f"Erro ao descriptografar dados da coluna {key}. {e}"
@@ -86,15 +86,22 @@ def formatarRetorno(colunas_criptografadas:list[str], retorno) -> dict:
             if colunas_criptografadas:
                 dados = removerCriptografia(colunas_criptografadas,dados)            
             dados = corrigirTimezone(dados)
-            dados = dict(sorted(dados.items(), key=lambda x: x[0].lower()))
-            retorno_formatado.append(dados)
+            dados.pop('token', None)
+            dados.pop('clientSecret', None)
+            dados.pop('dhGeracaoToken', None)
+            dados.pop('dhExpiracaoToken', None)
+            retorno_formatado.append(dados)        
         return retorno_formatado
     
     retorno.__dict__.pop('_sa_instance_state', None)
     if colunas_criptografadas:
         dados = removerCriptografia(colunas_criptografadas,retorno.__dict__)
     dados = corrigirTimezone(retorno.__dict__)
-    return dict(sorted(dados.items(), key=lambda x: x[0].lower()))
+    dados.pop('token', None)
+    dados.pop('clientSecret', None)
+    dados.pop('dhGeracaoToken', None)
+    dados.pop('dhExpiracaoToken', None)
+    return dados
         
 def validarColunasExistentes(modelo, kwargs:dict) -> dict:
     """

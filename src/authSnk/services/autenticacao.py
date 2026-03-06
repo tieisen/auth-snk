@@ -29,7 +29,7 @@ class AutenticacaoService:
         if not self.dados_solucao:
             self.dados_solucao = await self.buscarToken()
             
-        url:str = os.getenv("URL_LOGIN") if self.dados_solucao.get('ambiente') == 'prd' else os.getenv("URL_LOGIN_SND")        
+        url:str = os.getenv("URL_LOGIN_PRD") if self.dados_solucao.get('ambiente') == 'prd' else os.getenv("URL_LOGIN_SND")        
 
         auth:dict={}
         

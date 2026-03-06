@@ -46,6 +46,7 @@ class SolucaoCrud:
                     descricao=descricao,
                     componente=componente,
                     ambiente=ambiente,
+                    **kwargs
                 )
                 session.add(solucao)
                 await session.commit()
@@ -62,25 +63,30 @@ class SolucaoCrud:
         ambiente:str=None
     ) -> dict:
 
-        if not all([id,descricao,componente,ambiente]):
-            raise ValueError("Nenhum parâmetro informado para pesquisa.")
         if not id and not any([descricao,componente,ambiente]):
-            raise ValueError("Pesquisa inválida. Informe Descrição, Componente e Ambiente ou somente o ID.")
-
+            raise ValueError("Nenhum parâmetro informado para pesquisa.")
+        
         async with AsyncSessionLocal() as session:
+
+            filtros = []
+
             if id:
-                result = await session.execute(
-                    select(Solucao)
-                    .where(Solucao.id == id)
-                )
-            else:
-                result = await session.execute(
-                    select(Solucao)
-                    .where(Solucao.descricao == descricao,
-                        Solucao.componente == componente,
-                        Solucao.ambiente == ambiente)
-                )                
-            solucao = result.scalar_one_or_none()
+                filtros.append(Solucao.id == id)
+            if descricao:
+                filtros.append(Solucao.descricao == descricao)
+            if componente:
+                filtros.append(Solucao.componente == componente)
+            if ambiente:
+                filtros.append(Solucao.ambiente == ambiente)
+
+            query = select(Solucao)
+
+            if filtros:
+                query = query.where(*filtros)
+
+            result = await session.execute(query)                
+                        
+            solucao = result.scalars().all()
             
         if not solucao and id:
             raise ValueError(f"Solução não encontrada no banco de dados.\nID: {id}")
@@ -115,7 +121,8 @@ class SolucaoCrud:
                 raise ValueError(f"Solução {id} não encontrada no banco de dados")
             else:
                 for key, value in kwargs.items():
-                    setattr(solucao, key, value)
+                    if value:
+                        setattr(solucao, key, value)
                 await session.commit()
                 solucao = True 
                            

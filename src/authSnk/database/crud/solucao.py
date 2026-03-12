@@ -1,7 +1,7 @@
 from src.authSnk.database.database import AsyncSessionLocal
 from sqlalchemy.future import select
 from src.authSnk.database.models import Solucao
-from src.authSnk.utils.database import validarDados, formatarRetorno
+from src.authSnk.utils.database import validarDados, formatarRetorno, formatarRetornoAuth
 
 COLUNAS_CRIPTOGRAFADAS = [
         'clientSecret',
@@ -95,6 +95,22 @@ class SolucaoCrud:
         
         return formatarRetorno(colunas_criptografadas=COLUNAS_CRIPTOGRAFADAS,
                                retorno=solucao)
+
+    async def buscarAutenticacao(
+        self,
+        id:int
+    ) -> dict:
+        async with AsyncSessionLocal() as session:
+            query = select(Solucao)
+            query = query.where(Solucao.id == id)
+            result = await session.execute(query)                        
+            solucao = result.scalars().all()
+            
+        if not solucao:
+            raise ValueError(f"Solução não encontrada no banco de dados.\nID: {id}")
+        
+        return formatarRetornoAuth(colunas_criptografadas=COLUNAS_CRIPTOGRAFADAS,
+                                   retorno=solucao)
     
     async def atualizar(
         self,

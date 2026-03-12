@@ -87,6 +87,7 @@ def formatarRetorno(colunas_criptografadas:list[str], retorno) -> dict:
                 dados = removerCriptografia(colunas_criptografadas,dados)            
             dados = corrigirTimezone(dados)
             dados.pop('token', None)
+            dados.pop('xToken', None)            
             dados.pop('clientSecret', None)
             dados.pop('dhGeracaoToken', None)
             dados.pop('dhExpiracaoToken', None)
@@ -98,9 +99,36 @@ def formatarRetorno(colunas_criptografadas:list[str], retorno) -> dict:
         dados = removerCriptografia(colunas_criptografadas,retorno.__dict__)
     dados = corrigirTimezone(retorno.__dict__)
     dados.pop('token', None)
+    dados.pop('xToken', None)
     dados.pop('clientSecret', None)
     dados.pop('dhGeracaoToken', None)
     dados.pop('dhExpiracaoToken', None)
+    return dados
+
+def formatarRetornoAuth(colunas_criptografadas:list[str], retorno) -> dict:
+    """
+    Converte o retorno do SQLAlchemy em um dicionário, tratando os campos de data.
+        :param colunas_criptografadas: lista de colunas de dados criptografados
+        :param retorno: retorno do SQLAlchemy
+    """        
+    if not retorno:
+        return False    
+    
+    if isinstance(retorno,list):
+        retorno_formatado = []
+        for r in retorno:
+            r.__dict__.pop('_sa_instance_state', None)            
+            dados = r.__dict__
+            if colunas_criptografadas:
+                dados = removerCriptografia(colunas_criptografadas,dados)            
+            dados = corrigirTimezone(dados)
+            retorno_formatado.append(dados)        
+        return retorno_formatado
+    
+    retorno.__dict__.pop('_sa_instance_state', None)
+    if colunas_criptografadas:
+        dados = removerCriptografia(colunas_criptografadas,retorno.__dict__)
+    dados = corrigirTimezone(retorno.__dict__)
     return dados
         
 def validarColunasExistentes(modelo, kwargs:dict) -> dict:

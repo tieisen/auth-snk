@@ -81,7 +81,7 @@ class AutenticacaoService:
         return status
         
     async def buscarToken(self) -> dict:        
-        return (await self.solucao_crud.buscar(id=self.solucao_id))[0]
+        return (await self.solucao_crud.buscarAutenticacao(id=self.solucao_id))[0]
         
     async def autenticar(self) -> tuple[bool, dict]:
         """
@@ -93,14 +93,14 @@ class AutenticacaoService:
         token_atual:str = ""
         dh_expiracao:datetime = None
         dh_geracao:datetime = None
-        sucesso:bool = True
+        sucesso:bool = False
         mensagem:str = ""
         retorno:dict = {"token": "", "dhExpiracaoToken": "", "mensagem": ""}
         
         try:            
             if not self.dados_solucao:
                 self.dados_solucao = await self.buscarToken()
-                
+
             if self.dados_solucao.get('xToken') != self.xToken:
                 raise PermissionError('xToken inválido')
             
@@ -110,33 +110,35 @@ class AutenticacaoService:
             # Verifica se o token ainda é válido (com margem de 1 minuto)
             if token_atual and dh_expiracao:
                 if dh_expiracao > (datetime.now(tz=dh_expiracao.tzinfo) + timedelta(minutes=1)):
-                    return token_atual
+                    sucesso = True
+                    mensagem = "Autenticado com sucesso"
+                    token_string = token_atual
 
-            # Se não houver token ou estiver expirado, realiza novo login
-            novo_token_data = await self.logar()
-            
-            token_string = novo_token_data.get('access_token')
-            expires_in = novo_token_data.get('expires_in')            
-            if not all([token_string,expires_in]):
-                raise ValueError("Token ou tempo de expiração não encontrado na resposta do login")
-            
-            dh_geracao = datetime.now()
-            dh_expiracao = await self.calcularExpiracao(segundos=expires_in)
-            
-            # Salva o token no banco
-            await self.salvarToken(
-                novoToken=token_string,
-                dhGeracaoToken=dh_geracao,
-                dhExpiracaoToken=dh_expiracao
-            )
-            
-            mensagem = "Autenticado com sucesso"
+            if not sucesso:
+                # Se não houver token ou estiver expirado, realiza novo login
+                novo_token_data = await self.logar()
+                
+                token_string = novo_token_data.get('access_token')
+                expires_in = novo_token_data.get('expires_in')            
+                if not all([token_string,expires_in]):
+                    raise ValueError("Token ou tempo de expiração não encontrado na resposta do login")
+                
+                dh_geracao = datetime.now()
+                dh_expiracao = await self.calcularExpiracao(segundos=expires_in)
+                
+                # Salva o token no banco
+                await self.salvarToken(
+                    novoToken=token_string,
+                    dhGeracaoToken=dh_geracao,
+                    dhExpiracaoToken=dh_expiracao
+                )
+                
+                mensagem = "Autenticado com sucesso"
+                sucesso = True
             
         except Exception as e:
-            sucesso = False
             mensagem = f"Erro ao autenticar: {e}"            
             logger.error(mensagem)
-            print(mensagem)
                         
         finally:
             await self.registrarLog(sucesso=sucesso, mensagem=mensagem)

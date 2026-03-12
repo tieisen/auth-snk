@@ -109,7 +109,7 @@ class AutenticacaoService:
 
             # Verifica se o token ainda é válido (com margem de 1 minuto)
             if token_atual and dh_expiracao:
-                if dh_expiracao > (datetime.now() + timedelta(minutes=1)):
+                if dh_expiracao > (datetime.now(tz=dh_expiracao.tzinfo) + timedelta(minutes=1)):
                     return token_atual
 
             # Se não houver token ou estiver expirado, realiza novo login

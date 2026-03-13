@@ -86,8 +86,7 @@ def formatarRetorno(colunas_criptografadas:list[str], retorno) -> dict:
             if colunas_criptografadas:
                 dados = removerCriptografia(colunas_criptografadas,dados)            
             dados = corrigirTimezone(dados)
-            dados.pop('token', None)
-            dados.pop('xToken', None)            
+            dados.pop('token', None)          
             dados.pop('clientSecret', None)
             dados.pop('dhGeracaoToken', None)
             dados.pop('dhExpiracaoToken', None)
@@ -99,7 +98,6 @@ def formatarRetorno(colunas_criptografadas:list[str], retorno) -> dict:
         dados = removerCriptografia(colunas_criptografadas,retorno.__dict__)
     dados = corrigirTimezone(retorno.__dict__)
     dados.pop('token', None)
-    dados.pop('xToken', None)
     dados.pop('clientSecret', None)
     dados.pop('dhGeracaoToken', None)
     dados.pop('dhExpiracaoToken', None)

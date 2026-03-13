@@ -3,7 +3,10 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, model_validator
 from src.authSnk.services.solucao import SolucaoService
+from src.authSnk.utils.configLog import configLog
+
 load_dotenv()
+logger = configLog(__name__)
 
 class SolucaoCadastroModel(BaseModel):
     descricao:str
@@ -11,7 +14,7 @@ class SolucaoCadastroModel(BaseModel):
     ambiente:Literal['prd','snd']
     clientId:str
     clientSecret:str
-    xToken:str | None = None
+    xToken:str
     
     @model_validator(mode="after")
     def validarAmbiente(cls, model):
@@ -20,12 +23,12 @@ class SolucaoCadastroModel(BaseModel):
         return model
 
 class SolucaoAtualizarModel(BaseModel):
-    descricao:str | None = None
-    componente:str | None = None
-    ambiente:Literal['prd','snd'] | None = None
-    clientId:str | None = None
-    clientSecret:str | None = None
-    xToken:str | None = None
+    descricao:str | None
+    componente:str | None
+    ambiente:Literal['prd','snd'] | None
+    clientId:str | None
+    clientSecret:str | None
+    xToken:str | None
     
     @model_validator(mode="after")
     def validarAmbiente(cls, model):
@@ -67,7 +70,7 @@ async def buscar_solucao_id(id:int) -> dict:
     return res
 
 @router.get("/solucao", status_code=status.HTTP_200_OK)
-async def buscar_solucao(descricao: str | None = None, componente: str | None = None, ambiente: str | None = None) -> list[dict]:
+async def buscar_solucao(descricao: str | None, componente: str | None, ambiente: str | None) -> list[dict]:
     res:dict={}    
     solucao = SolucaoService()
     

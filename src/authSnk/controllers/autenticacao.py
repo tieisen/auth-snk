@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
+from datetime import datetime
 from pydantic import BaseModel
 from fastapi.security import APIKeyHeader
 from src.authSnk.services.autenticacao import AutenticacaoService
@@ -9,7 +10,7 @@ class AutenticacaoLogarModel(BaseModel):
 class AutenticacaoResponse(BaseModel):
     solucaoId: int
     token: str
-    dhExpiracaoToken: str
+    dhExpiracaoToken: datetime
     mensagem: str
 
 router = APIRouter()

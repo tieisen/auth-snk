@@ -26,7 +26,7 @@ class SolucaoService:
         ambiente:str,
         clientId:str,
         clientSecret:str,
-        xToken:str|None
+        xToken:str
     ) -> dict:
         
         dados_solucao:dict = {}

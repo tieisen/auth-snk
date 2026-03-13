@@ -7,7 +7,7 @@ class AutenticacaoLogarModel(BaseModel):
     solucaoId:int
     
 class AutenticacaoResponse(BaseModel):
-    solucaoId: str
+    solucaoId: int
     token: str
     dhExpiracaoToken: str
     mensagem: str
